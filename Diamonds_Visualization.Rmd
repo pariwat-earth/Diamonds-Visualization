@@ -1,0 +1,172 @@
+---
+title: "Data_Visualization_Homework"
+output: pdf_document
+date: "2022-10-09"
+---
+
+## install packages
+```{r }
+install.packages(c("tidyverse","patchwork","lubridate"))
+install.packages("ggthemes")
+```
+
+## include library
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(ggthemes)
+```
+
+## dataset diamonds
+```{r}
+head(diamonds)
+```
+
+```{r}
+str(diamonds)
+```
+
+## quality number of cuts. from the clarity of diamonds
+```{r}
+diamonds %>%
+  ggplot(aes(clarity,fill=cut)) +
+  geom_bar() +
+  theme_minimal()+
+  labs(
+    title = "Ralationship between quantity of clarity",
+    x = "clarity",
+    y = "quantity"
+  )
+```
+## sales and average price of carat
+
+### tranform data
+```{r}
+sal_ave <- diamonds %>%
+  select(price, carat) %>%
+  mutate(range_of_carat = case_when(
+    carat < 1.00 ~ "low point",
+    carat < 2.00 ~ "1 point",
+    carat < 3.00 ~ "2 point",
+    carat < 4.00 ~ "3 point",
+    TRUE ~ "high point"
+  )) %>%
+  mutate(range_of_carat = factor(
+    range_of_carat,
+    labels = c("low point", "1 point", "2 point", "3 point", "high point"),
+    levels = c("low point", "1 point", "2 point", "3 point", "high point"),
+    ordered = TRUE)) %>%
+  group_by(range_of_carat) %>%
+  summarise(sum_price = sum(price), mean_price = mean(price))
+```
+
+### plot chart
+```{r}
+sal_ave %>%
+  ggplot(aes(range_of_carat, sum_price,fill=range_of_carat))+
+  geom_col()+
+  theme_minimal()+
+  labs(
+    title = "Sales of diamonds by carat",
+    x = "carat",
+    y = "sale prrice"
+  )
+```
+```{r}
+sal_ave %>%
+  ggplot(aes(mean_price,range_of_carat,fill=range_of_carat))+
+  geom_col()+
+  theme_minimal()+
+  labs(
+    title = "Relationship Between Average Price and Carat",
+    x = "price",
+    y = "carat"
+  )
+```
+## area of cut 
+### tranfrom data
+```{r}
+area_of_cut <- diamonds %>%
+  select(x,y,z,price,cut) %>%
+  mutate(area = round(x*y*z,digits = 1))
+```
+
+## plot chart
+```{r}
+set.seed(25)
+sample_n(area_of_cut,500) %>%
+  ggplot(aes(area, price, color=cut)) +
+  geom_point(alpha=0.5,size=2)+
+  geom_smooth(method = "lm", se=F)+
+  theme_few()+
+  scale_color_brewer(type = "qual",palette = 3)+
+  labs(
+    title = "Relationship Between Price and Area",
+    x = "area",
+    y = "price"
+  )
+```
+
+```{r}
+set.seed(25)
+sample_n(area_of_cut,500) %>%
+  ggplot(aes(area, price, color=cut)) +
+  geom_point(alpha=1,size=2)+
+  geom_smooth(alpha=0.1)+
+  facet_wrap(~cut,ncol = 5)+
+  theme_few()+
+  scale_color_brewer(type = "qual",palette = 3)+
+  labs(
+    title = "Relationship Between Price and Area",
+    subtitle = "group by cut",
+    x = "area",
+    y = "price"
+  )
+```
+
+```{r}
+ggplot(diamonds, aes(cut, clarity)) +
+  geom_count(aes(color = ..n.., size = ..n..)) +
+  guides(color = 'legend')+
+  scale_colour_gradientn(colours = c("#d73027","darkgrey","#4575b4"))+
+  scale_size_area(max_size = 10)+
+  theme_minimal()+
+  labs(
+    title = "Relationship Between Clarity and Cut",
+    x = "cut",
+    y = "clarity"
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
